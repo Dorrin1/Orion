@@ -8,8 +8,10 @@
 
 ## Установка
 
+Требуется **Python 3.7+**.
+
 ```bash
-python -m venv .venv
+python3.7 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
@@ -21,21 +23,21 @@ pip install -r requirements.txt
 ### Голосовой режим
 
 ```bash
-python orion_assistant.py
+python3.7 orion_assistant.py
 ```
 
 ### Текстовый режим (без микрофона и TTS)
 
 ```bash
-python orion_assistant.py --no-voice
+python3.7 orion_assistant.py --no-voice
 ```
 
 ### Выбор поисковика
 
 ```bash
-python orion_assistant.py --engine duckduckgo
-python orion_assistant.py --engine wikipedia
-python orion_assistant.py --engine google
+python3.7 orion_assistant.py --engine duckduckgo
+python3.7 orion_assistant.py --engine wikipedia
+python3.7 orion_assistant.py --engine google
 ```
 
 ## Команды

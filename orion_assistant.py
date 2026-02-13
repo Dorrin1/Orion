@@ -25,6 +25,12 @@ try:
 except ImportError:
     DDGS = None
 
+try:
+    # Legacy API for older duckduckgo-search releases (Python 3.7 friendly)
+    from duckduckgo_search import ddg
+except ImportError:
+    ddg = None
+
 
 @dataclass
 class SearchResult:
@@ -51,17 +57,35 @@ class SearchClient:
 
     def _duckduckgo(self, query: str, limit: int) -> List[SearchResult]:
         results: List[SearchResult] = []
-        if DDGS is None:
+        if DDGS is None and ddg is None:
             raise RuntimeError("duckduckgo-search не установлен. Установите зависимости из requirements.txt")
-        with DDGS(timeout=self.timeout) as ddgs:
-            for item in ddgs.text(query, max_results=limit):
-                results.append(
-                    SearchResult(
-                        title=item.get("title", "Без заголовка"),
-                        url=item.get("href", ""),
-                        snippet=item.get("body", ""),
+
+        if DDGS is not None:
+            with DDGS(timeout=self.timeout) as ddgs_client:
+                raw_items = ddgs_client.text(query, max_results=limit)
+                for item in raw_items:
+                    results.append(
+                        SearchResult(
+                            title=item.get("title", "Без заголовка"),
+                            url=item.get("href", ""),
+                            snippet=item.get("body", ""),
+                        )
                     )
+            return results
+
+        legacy_items = ddg(query, max_results=limit) or []
+        for item in legacy_items:
+            # Legacy API uses keys: title, href, body
+            # Some versions may also return url/snippet
+            url = item.get("href", item.get("url", ""))
+            snippet = item.get("body", item.get("snippet", ""))
+            results.append(
+                SearchResult(
+                    title=item.get("title", "Без заголовка"),
+                    url=url,
+                    snippet=snippet,
                 )
+            )
         return results
 
     def _wikipedia(self, query: str, limit: int) -> List[SearchResult]:
